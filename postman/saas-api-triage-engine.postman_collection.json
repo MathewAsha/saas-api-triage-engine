@@ -1,0 +1,117 @@
+{
+  "info": {
+    "_postman_id": "d2b9e841-9c74-4a32-8c5f-22a1b4f39c01",
+    "name": "SaaS API & HAR Log Triage Engine",
+    "description": "Postman collection for testing the local FastAPI HAR Triage & Telemetry Analytics microservice.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Service reports healthy', function () {",
+              "    pm.expect(pm.response.json().status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "2. Upload HAR Capture for Triage (POST)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response includes ADO markdown and summary', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property('summary');",
+              "    pm.expect(body).to.have.property('ado_bug_markdown');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "samples/sample_uat_session.har"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/triage/har?slow_threshold_ms=2000",
+          "host": ["{{base_url}}"],
+          "path": ["triage", "har"],
+          "query": [
+            {
+              "key": "slow_threshold_ms",
+              "value": "2000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Get SQL Telemetry & p95 Summary (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Includes endpoint p95 latency and tenant health', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property('endpoint_p95_latency');",
+              "    pm.expect(body).to.have.property('tenant_session_health');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/analytics/summary",
+          "host": ["{{base_url}}"],
+          "path": ["analytics", "summary"]
+        }
+      }
+    }
+  ]
+}

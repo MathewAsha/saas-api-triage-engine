@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Secrets & private local HAR captures (never push company/UAT files!)
+.env
+private_hars/
+
+# Local databases & generated outputs
+data/*.db
+data/*.sqlite
+reports/*.csv
+reports/*.md
